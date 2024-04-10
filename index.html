@@ -1,0 +1,24 @@
+<html>
+<button id="record">record</button>
+<script>
+window.record.addEventListener('click', async () => {
+  if (!MediaRecorder.isTypeSupported("video/webm;codecs=av1")) throw 'failed to use unsupported av1 codec. edit this';
+  const suggestedName = "screen-recording.webm";
+  const handle = await window.showSaveFilePicker({ suggestedName });
+  const stream = await navigator.mediaDevices.getDisplayMedia();
+  const recorder = new MediaRecorder(stream, {
+    /* videoBitsPerSecond: 25000000, */
+    mimeType: "video/webm;codecs=av1",
+  });
+  const writable = await handle.createWritable();
+  recorder.start();
+  recorder.addEventListener("dataavailable", async (event) => {
+      await writable.write(event.data);
+      if (recorder.state === "inactive") {
+        /* Close the file when the recording stops. */
+        await writable.close();
+      }
+  });
+});
+</script>
+</html>
