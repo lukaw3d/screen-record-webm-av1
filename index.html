@@ -1,8 +1,8 @@
 <html>
-<button id="record">record</button>
+<button id="recordAv1">record webm av1</button>
 <script>
-window.record.addEventListener('click', async () => {
-  if (!MediaRecorder.isTypeSupported("video/webm;codecs=av1")) throw 'failed to use unsupported av1 codec. edit this';
+window.recordAv1.addEventListener('click', async () => {
+  if (!MediaRecorder.isTypeSupported("video/webm;codecs=av1")) throw 'failed to use unsupported codec.';
   const suggestedName = "screen-recording.webm";
   const handle = await window.showSaveFilePicker({ suggestedName });
   const stream = await navigator.mediaDevices.getDisplayMedia();
@@ -10,6 +10,25 @@ window.record.addEventListener('click', async () => {
     /* videoBitsPerSecond: 25000000, */
     mimeType: "video/webm;codecs=av1",
   });
+  const writable = await handle.createWritable();
+  recorder.start();
+  recorder.addEventListener("dataavailable", async (event) => {
+      await writable.write(event.data);
+      if (recorder.state === "inactive") {
+        /* Close the file when the recording stops. */
+        await writable.close();
+      }
+  });
+});
+</script>
+
+<button id="recordDefault">record default codec</button>
+<script>
+window.recordDefault.addEventListener('click', async () => {
+  const suggestedName = "screen-recording.mp4";
+  const handle = await window.showSaveFilePicker({ suggestedName });
+  const stream = await navigator.mediaDevices.getDisplayMedia();
+  const recorder = new MediaRecorder(stream);
   const writable = await handle.createWritable();
   recorder.start();
   recorder.addEventListener("dataavailable", async (event) => {
